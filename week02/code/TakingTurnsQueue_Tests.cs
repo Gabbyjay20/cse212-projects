@@ -7,11 +7,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 [TestClass]
 public class TakingTurnsQueueTests
 {
+    // TEST CASE:
+    // Create a queue with Bob (2), Tim (5), Sue (3) and run until empty.
+    // Expected: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
+    //
+    // TEST RESULT:
+    // ❌ Failed before fix
+    // Expected: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
+    // Actual: Wrong order and premature removal due to stack implementation and incorrect re-enqueue logic.
+    // ERROR FOUND:
+    // PersonQueue used LIFO instead of FIFO; infinite turns not handled correctly.
+    //
+    // RESULT AFTER FIX:
+    // ✅ Passed
     [TestMethod]
-    // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3) and
-    // run until the queue is empty
-    // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
     public void TestTakingTurnsQueue_FiniteRepetition()
     {
         var bob = new Person("Bob", 2);
@@ -39,11 +48,20 @@ public class TakingTurnsQueueTests
         }
     }
 
+    // TEST CASE:
+    // Create a queue with Bob (2), Tim (5), Sue (3), run 5 times, add George (3), run until empty.
+    // Expected: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
+    //
+    // TEST RESULT:
+    // ❌ Failed before fix
+    // Expected: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
+    // Actual: Wrong order and incorrect handling of added player due to stack and logic errors.
+    // ERROR FOUND:
+    // PersonQueue LIFO caused wrong order; re-enqueue logic failed for infinite and finite turns.
+    //
+    // RESULT AFTER FIX:
+    // ✅ Passed
     [TestMethod]
-    // Scenario: Create a queue with the following people and turns: Bob (2), Tim (5), Sue (3)
-    // After running 5 times, add George with 3 turns.  Run until the queue is empty.
-    // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, George, Sue, Tim, George, Tim, George
-    // Defect(s) Found: 
     public void TestTakingTurnsQueue_AddPlayerMidway()
     {
         var bob = new Person("Bob", 2);
@@ -81,11 +99,20 @@ public class TakingTurnsQueueTests
         }
     }
 
+    // TEST CASE:
+    // Create a queue with Bob (2), Tim (0, infinite), Sue (3), run 10 times.
+    // Expected: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
+    //
+    // TEST RESULT:
+    // ❌ Failed before fix
+    // Expected: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
+    // Actual: Tim removed after first turn instead of staying forever.
+    // ERROR FOUND:
+    // Infinite turns (0) not re-enqueued; wrong logic for turns <=0.
+    //
+    // RESULT AFTER FIX:
+    // ✅ Passed
     [TestMethod]
-    // Scenario: Create a queue with the following people and turns: Bob (2), Tim (Forever), Sue (3)
-    // Run 10 times.
-    // Expected Result: Bob, Tim, Sue, Bob, Tim, Sue, Tim, Sue, Tim, Tim
-    // Defect(s) Found: 
     public void TestTakingTurnsQueue_ForeverZero()
     {
         var timTurns = 0;
@@ -112,11 +139,20 @@ public class TakingTurnsQueueTests
         Assert.AreEqual(timTurns, infinitePerson.Turns, "People with infinite turns should not have their turns parameter modified to a very big number. A very big number is not infinite.");
     }
 
+    // TEST CASE:
+    // Create a queue with Tim (-3, infinite), Sue (3), run 10 times.
+    // Expected: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
+    //
+    // TEST RESULT:
+    // ❌ Failed before fix
+    // Expected: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
+    // Actual: Tim removed after first turn.
+    // ERROR FOUND:
+    // Negative turns not treated as infinite; not re-enqueued.
+    //
+    // RESULT AFTER FIX:
+    // ✅ Passed
     [TestMethod]
-    // Scenario: Create a queue with the following people and turns: Tim (Forever), Sue (3)
-    // Run 10 times.
-    // Expected Result: Tim, Sue, Tim, Sue, Tim, Sue, Tim, Tim, Tim, Tim
-    // Defect(s) Found: 
     public void TestTakingTurnsQueue_ForeverNegative()
     {
         var timTurns = -3;
@@ -140,10 +176,13 @@ public class TakingTurnsQueueTests
         Assert.AreEqual(timTurns, infinitePerson.Turns, "People with infinite turns should not have their turns parameter modified to a very big number. A very big number is not infinite.");
     }
 
+    // TEST CASE:
+    // Try to get next person from empty queue.
+    // Expected: InvalidOperationException with "No one in the queue."
+    //
+    // TEST RESULT:
+    // ✅ Passed
     [TestMethod]
-    // Scenario: Try to get the next person from an empty queue
-    // Expected Result: Exception should be thrown with appropriate error message.
-    // Defect(s) Found: 
     public void TestTakingTurnsQueue_Empty()
     {
         var players = new TakingTurnsQueue();
