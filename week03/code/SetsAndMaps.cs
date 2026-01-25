@@ -3,9 +3,9 @@ using System.Text.Json;
 public static class SetsAndMaps
 {
     /// <summary>
-    /// The words parameter contains a list of two character 
-    /// words (lower case, no duplicates). Using sets, find an O(n) 
-    /// solution for returning all symmetric pairs of words.  
+    /// The words parameter contains a list of two character
+    /// words (lower case, no duplicates). Using sets, find an O(n)
+    /// solution for returning all symmetric pairs of words.
     ///
     /// For example, if words was: [am, at, ma, if, fi], we would return :
     ///
@@ -21,8 +21,28 @@ public static class SetsAndMaps
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
     public static string[] FindPairs(string[] words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        HashSet<string> seen = new HashSet<string>();
+        List<string> result = new List<string>();
+
+        foreach (string word in words)
+        {
+            char a = word[0];
+            char b = word[1];
+
+            // Skip words like "aa"
+            if (a == b) continue;
+
+            string reverse = $"{b}{a}";
+
+            if (seen.Contains(reverse))
+            {
+                result.Add($"{reverse} & {word}");
+            }
+
+            seen.Add(word);
+        }
+
+        return result.ToArray();
     }
 
     /// <summary>
@@ -42,7 +62,8 @@ public static class SetsAndMaps
         foreach (var line in File.ReadLines(filename))
         {
             var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            string degree = fields[3];
+            degrees[degree] = degrees.GetValueOrDefault(degree, 0) + 1;
         }
 
         return degrees;
@@ -66,41 +87,72 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        Dictionary<char, int> counts = new Dictionary<char, int>();
+
+        word1 = word1.Replace(" ", "").ToLower();
+        word2 = word2.Replace(" ", "").ToLower();
+
+        if (word1.Length != word2.Length)
+            return false;
+
+        foreach (char c in word1)
+        {
+            if (!counts.ContainsKey(c))
+                counts[c] = 0;
+
+            counts[c]++;
+        }
+
+        foreach (char c in word2)
+        {
+            if (!counts.ContainsKey(c))
+                return false;
+
+            counts[c]--;
+
+            if (counts[c] < 0)
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>
-    /// This function will read JSON (Javascript Object Notation) data from the 
+    /// This function will read JSON (Javascript Object Notation) data from the
     /// United States Geological Service (USGS) consisting of earthquake data.
     /// The data will include all earthquakes in the current day.
-    /// 
+    ///
     /// JSON data is organized into a dictionary. After reading the data using
     /// the built-in HTTP client library, this function will return a list of all
     /// earthquake locations ('place' attribute) and magnitudes ('mag' attribute).
-    /// Additional information about the format of the JSON data can be found 
-    /// at this website:  
-    /// 
+    /// Additional information about the format of the JSON data can be found
+    /// at this website:
+    ///
     /// https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
-    /// 
+    ///
     /// </summary>
-    public static string[] EarthquakeDailySummary()
+    public static async Task<string[]> EarthquakeDailySummary()
     {
-        const string uri = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
-        using var client = new HttpClient();
-        using var getRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-        using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
-        using var reader = new StreamReader(jsonStream);
-        var json = reader.ReadToEnd();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        string url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
 
-        var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
+        using HttpClient client = new HttpClient();
+        string json = await client.GetStringAsync(url);
 
-        // TODO Problem 5:
-        // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
-        // on those classes so that the call to Deserialize above works properly.
-        // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
-        // 3. Return an array of these string descriptions.
-        return [];
+        FeatureCollection data =
+            JsonSerializer.Deserialize<FeatureCollection>(json);
+
+        List<string> result = new List<string>();
+
+        foreach (var feature in data.features)
+        {
+            if (feature.properties.mag.HasValue)
+            {
+                result.Add(
+                    $"{feature.properties.place} - Mag {feature.properties.mag}"
+                );
+            }
+        }
+
+        return result.ToArray();
     }
 }
