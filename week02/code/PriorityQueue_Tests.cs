@@ -5,16 +5,7 @@ public class PriorityQueueTests
 {
     // TEST CASE:
     // Ensures highest priority item is dequeued first.
-    //
-    // TEST RESULT:
-    // ❌ Failed before fix
-    // Expected: "B"
-    // Actual: "A"
-    // ERROR FOUND:
-    // Priority was ignored.
-    //
-    // RESULT AFTER FIX:
-    // ✅ Passed
+
     [TestMethod]
     public void HighestPriorityDequeuedFirst()
     {
@@ -27,16 +18,7 @@ public class PriorityQueueTests
 
     // TEST CASE:
     // Ensures FIFO order for same priority values.
-    //
-    // TEST RESULT:
-    // ❌ Failed before fix
-    // Expected: "A"
-    // Actual: "B"
-    // ERROR FOUND:
-    // FIFO order not preserved.
-    //
-    // RESULT AFTER FIX:
-    // ✅ Passed
+
     [TestMethod]
     public void SamePriorityFollowsFIFO()
     {
@@ -58,5 +40,52 @@ public class PriorityQueueTests
     {
         var pq = new PriorityQueue();
         pq.Dequeue();
+    }
+
+    // TEST CASE:
+    // If multiple items share the highest priority, the item closest to the front
+    // of the queue (FIFO) should be removed first.
+    //
+    // Arrange: A(2), B(5), C(5), D(1)
+    // Expected: B is dequeued first (B and C tie for highest priority, B is earlier)
+    // Arrange: A(2), B(5), C(5), D(1)
+    // Expected: B is dequeued first (B and C tie for highest priority, B is earlier)
+    [TestMethod]
+    public void HighestPriorityTie_FollowsFIFOAmongHighest()
+    {
+        var pq = new PriorityQueue();
+        pq.Enqueue("A", 2);
+        pq.Enqueue("B", 5);
+        pq.Enqueue("C", 5);
+        pq.Enqueue("D", 1);
+
+        Assert.AreEqual("B", pq.Dequeue());
+    }
+
+
+
+    [TestMethod]
+    public void Dequeue_RemovesItemFromQueue()
+    {
+        var pq = new PriorityQueue();
+        pq.Enqueue("A", 1);
+        pq.Enqueue("B", 5);
+
+        Assert.AreEqual("B", pq.Dequeue());
+        Assert.AreEqual("A", pq.Dequeue());
+    }
+
+    // TEST CASE:
+    // When empty, Dequeue must throw InvalidOperationException with the message
+    // "The queue is empty." (exact message requirement).
+
+
+    [TestMethod]
+    public void EmptyQueueThrowsException_WithExpectedMessage()
+    {
+        var pq = new PriorityQueue();
+
+        var ex = Assert.ThrowsException<InvalidOperationException>(() => pq.Dequeue());
+        Assert.AreEqual("The queue is empty.", ex.Message);
     }
 }
