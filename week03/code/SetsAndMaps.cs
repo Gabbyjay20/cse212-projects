@@ -131,12 +131,12 @@ public static class SetsAndMaps
     /// https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
     ///
     /// </summary>
-    public static async Task<string[]> EarthquakeDailySummary()
+    public static string[] EarthquakeDailySummary()
     {
         string url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
 
         using HttpClient client = new HttpClient();
-        string json = await client.GetStringAsync(url);
+        string json = client.GetStringAsync(url).Result;
 
         FeatureCollection data =
             JsonSerializer.Deserialize<FeatureCollection>(json);

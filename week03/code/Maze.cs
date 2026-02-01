@@ -60,7 +60,7 @@ public class Maze
     {
         var key = (_currX, _currY);
         if (_mazeMap[key][2])
-            _currY++;
+            _currY--;
         else
             throw new InvalidOperationException("Can't go that way!");
     }
@@ -73,7 +73,7 @@ public class Maze
     {
         var key = (_currX, _currY);
         if (_mazeMap[key][3])
-            _currY--;
+            _currY++;
         else
             throw new InvalidOperationException("Can't go that way!");
     }
