@@ -57,3 +57,4 @@ public static class Trees
         InsertMiddle(sortedNumbers, first, middle - 1, bst);
         InsertMiddle(sortedNumbers, middle + 1, last, bst);
     }
+}
